@@ -1,0 +1,132 @@
+import 'dart:async';
+
+// b. Enum Role
+// 1. Enum untuk merepresentasikan peran pengguna (Admin atau Customer)
+enum Role { Admin, Customer }
+
+// a. 2. kelas Product
+// Kelas untuk menyimpan data produk
+class Product {
+  // Atribut kelas Product
+  String productName;
+  double price;
+  bool inStock;
+
+  Product(this.productName, this.price, this.inStock);
+}
+
+// a. 1. kelas User
+// Kelas dasar User dengan atribut name, age, dan products (menggunakan null safety)
+class User {
+  // Atribut kelas User
+  String name;
+  int age;
+  // d. 1. Null Safety: diinisialisasi belakangan
+  late List<Product>? products;
+  Role? role; // Nullable role
+
+  User(this.name, this.age, this.role);
+}
+
+// c. 1. Subclass AdminUser
+// Subclass AdminUser mewarisi kelas User dan dapat menambah atau menghapus produk
+class AdminUser extends User {
+  // OOP: inheritance (pewarisan)
+  AdminUser(String name, int age, Role role) : super(name, age, role);
+
+  // c. 2. Metode untuk menambah produk
+  void addProduct(Product product) {
+    try {
+      // e. Exception Handling: Menangani kesalahan jika produk tidak tersedia
+      if (!product.inStock) {
+        throw Exception(
+            'Produk ${product.productName} tidak tersedia dalam stok.');
+      }
+      // d. 2. Null Safety: inisialisasi produk jika null
+      products ??= [];
+      if (!products!.any((p) => p.productName == product.productName)) {
+        products!.add(product);
+        print('Produk ${product.productName} berhasil ditambahkan.');
+      } else {
+        print('Produk ${product.productName} sudah ada dalam daftar.');
+      }
+    } on Exception catch (e) {
+      print('Error: $e'); // e. Exception Handling
+    }
+  }
+
+  // c. 2. Metode untuk menghapus produk berdasarkan nama produk
+  void removeProduct(String productName) {
+    if (products != null &&
+        products!.any((product) => product.productName == productName)) {
+      products!.removeWhere((product) => product.productName == productName);
+      print('Produk $productName berhasil dihapus.');
+    } else {
+      print('Produk $productName tidak ditemukan.');
+    }
+  }
+}
+
+// c. 1. Subclass CustomerUser
+// Subclass CustomerUser mewarisi kelas User dan hanya bisa melihat daftar produk
+class CustomerUser extends User {
+  // OOP: inheritance (pewarisan)
+  CustomerUser(String name, int age, Role role) : super(name, age, role);
+
+  // c. 3. Metode untuk melihat produk
+  void viewProducts() {
+    if (products != null && products!.isNotEmpty) {
+      print('Daftar Produk:');
+      for (var product in products!) {
+        print(
+            '- ${product.productName} (Harga: ${product.price}, Stok: ${product.inStock ? 'Tersedia' : 'Habis'})');
+      }
+    } else {
+      print('Tidak ada produk dalam daftar.');
+    }
+  }
+}
+
+// f. Asynchronous Programming
+// f. 1. Fungsi asinkron untuk mengambil detail produk dengan penundaan
+Future<void> fetchProductDetails(String productName) async {
+  print('Mengambil detail produk $productName...');
+  await Future.delayed(
+      Duration(seconds: 2)); // Asynchronous programming: penundaan
+  print('Detail produk $productName berhasil diambil.');
+}
+
+void main() {
+  // f. 3. Collections: Map untuk menyimpan daftar produk
+  Map<String, Product> productCatalog = {
+    'Kulkas': Product('Kulkas', 1500.0, true),
+    'TV': Product('TV', 800.0, true),
+    'Blender': Product('Blender', 150.0, false),
+  };
+
+  // f. 4. Collections: Set untuk menjaga keunikan produk
+  Set<Product> uniqueProducts = {
+    productCatalog['Kulkas']!,
+    productCatalog['TV']!,
+  };
+
+  // Membuat objek AdminUser dan CustomerUser
+  AdminUser admin = AdminUser('Annisa', 35, Role.Admin);
+  CustomerUser customer = CustomerUser('Tasya', 28, Role.Customer);
+
+  // Menetapkan produk kepada admin
+  admin.products = uniqueProducts.toList();
+
+  // Menambah produk baru
+  admin.addProduct(productCatalog['Blender']!); // Produk tidak tersedia
+
+  // Menambah produk yang tersedia
+  admin.addProduct(productCatalog['TV']!); // Sudah ada dalam daftar
+
+  // Menampilkan produk yang dimiliki customer
+  customer.products = admin.products;
+  customer.viewProducts();
+
+  // Mengambil detail produk secara asinkron
+  fetchProductDetails('Kulkas');
+}
