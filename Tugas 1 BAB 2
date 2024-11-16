@@ -1,0 +1,172 @@
+import 'dart:math';
+
+// 4. Enum FaseProyek untuk Konsistensi Proyek
+enum FaseProyek { Perencanaan, Pengembangan, Evaluasi }
+
+// 3. Mixin Kinerja untuk Produktivitas
+mixin Kinerja {
+  int produktivitas = 0;
+
+  void perbaruiProduktivitas(int nilai) {
+    if (nilai < 0 || nilai > 100) {
+      throw ArgumentError('Produktivitas harus antara 0 dan 100.');
+    }
+    produktivitas = nilai;
+  }
+
+  // 3. a. Kenaikan produktivitas setiap 30 hari
+  void tingkatkanProduktivitasSetiap30Hari() {
+    produktivitas = min(produktivitas + 10, 100);
+    print('Produktivitas meningkat menjadi $produktivitas');
+  }
+}
+
+// 1. b. Kelas abstrak Karyawan
+abstract class Karyawan with Kinerja {
+  final String nama;
+  final int umur;
+  final String peran;
+  // 2. Penggunaan Positional dan Named Arguments
+  Karyawan(this.nama, {required this.umur, required this.peran});
+
+  // 1. Metode diimplementasikan oleh subclass
+  void bekerja();
+}
+
+class KaryawanTetap extends Karyawan {
+  KaryawanTetap(String nama, {required int umur, required String peran})
+      : super(nama, umur: umur, peran: peran);
+
+  @override
+  void bekerja() {
+    print('$nama, seorang $peran, bekerja penuh waktu.');
+  }
+}
+
+class KaryawanKontrak extends Karyawan {
+  KaryawanKontrak(String nama, {required int umur, required String peran})
+      : super(nama, umur: umur, peran: peran);
+
+  @override
+  void bekerja() {
+    print('$nama, seorang $peran, bekerja secara kontrak.');
+  }
+}
+
+// 1. a. Kelas ProdukDigital
+class ProdukDigital {
+  final String namaProduk;
+  final double harga;
+  final String kategori;
+  int jumlahTerjual;
+
+  ProdukDigital({
+    required this.namaProduk,
+    required this.harga,
+    required this.kategori,
+    this.jumlahTerjual = 0,
+  });
+
+  double terapkanDiskon() {
+    if (kategori == 'NetworkAutomation' && jumlahTerjual > 50) {
+      double hargaDiskon = harga * 0.85;
+      return hargaDiskon >= 200000 ? hargaDiskon : 200000;
+    }
+    return harga;
+  }
+
+  // Getter hargaAkhir untuk mengambil harga setelah diskon
+  double get hargaAkhir {
+    return terapkanDiskon();
+  }
+}
+
+// 5. Kelas Perusahaan untuk mengelola karyawan aktif dan non-aktif
+class Perusahaan {
+  List<Karyawan> karyawanAktif = [];
+  List<Karyawan> karyawanNonAktif = [];
+
+  void tambahKaryawan(Karyawan karyawan) {
+    if (karyawanAktif.length >= 20) {
+      print('Batas maksimal karyawan aktif tercapai!');
+      return;
+    }
+    karyawanAktif.add(karyawan);
+  }
+
+  void resignKaryawan(Karyawan karyawan) {
+    if (karyawanAktif.contains(karyawan)) {
+      karyawanAktif.remove(karyawan);
+      karyawanNonAktif.add(karyawan);
+      print(
+          '${karyawan.nama} telah resign dan dipindahkan ke daftar non-aktif.');
+    } else {
+      print('Karyawan tidak ditemukan di daftar aktif.');
+    }
+  }
+}
+
+// Kelas Proyek untuk mengelola fase proyek
+class Proyek {
+  FaseProyek fase = FaseProyek.Perencanaan;
+  List<Karyawan> tim = [];
+  DateTime tanggalMulai;
+
+  Proyek(this.tanggalMulai);
+
+  void tambahKaryawan(Karyawan karyawan) {
+    if (tim.length >= 20) {
+      print('Tim proyek penuh! Maksimal 20 karyawan aktif.');
+      return;
+    }
+    tim.add(karyawan);
+  }
+
+  void alihkanFase() {
+    if (fase == FaseProyek.Perencanaan && tim.length >= 5) {
+      fase = FaseProyek.Pengembangan;
+      print('Fase telah dialihkan ke Pengembangan.');
+    } else if (fase == FaseProyek.Pengembangan &&
+        DateTime.now().difference(tanggalMulai).inDays > 45) {
+      fase = FaseProyek.Evaluasi;
+      print('Fase telah dialihkan ke Evaluasi.');
+    } else {
+      print('Syarat untuk beralih fase belum terpenuhi.');
+    }
+  }
+}
+
+void main() {
+  var karyawan1 = KaryawanTetap('Annisa', umur: 30, peran: 'Developer');
+  var karyawan2 = KaryawanKontrak('Tasya', umur: 28, peran: 'NetworkEngineer');
+
+  // Memperbarui produktivitas karyawan
+  karyawan1.perbaruiProduktivitas(90);
+  karyawan1.tingkatkanProduktivitasSetiap30Hari(); // Produktivitas meningkat
+  karyawan2.perbaruiProduktivitas(80);
+
+  // tambahkan produk
+  var produk1 = ProdukDigital(
+    namaProduk: 'Sistem Otomasi Jaringan',
+    harga: 250000,
+    kategori: 'NetworkAutomation',
+    jumlahTerjual: 55,
+  );
+
+  print('Produk: ${produk1.namaProduk}');
+  print('Harga Awal: ${produk1.harga}');
+  print('Harga Akhir (dengan diskon jika ada): ${produk1.hargaAkhir}');
+
+  // tambahkan karyawan ke proyek
+  var proyek = Proyek(DateTime.now().subtract(Duration(days: 50)));
+  proyek.tambahKaryawan(karyawan1);
+  proyek.tambahKaryawan(karyawan2);
+
+  proyek.alihkanFase();
+
+  // menambahkan karyawan ke perusahaan dan mencoba resign
+  var perusahaan = Perusahaan();
+  perusahaan.tambahKaryawan(karyawan1);
+  perusahaan.tambahKaryawan(karyawan2);
+  perusahaan.resignKaryawan(karyawan2);
+}
