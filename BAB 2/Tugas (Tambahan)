@@ -1,0 +1,96 @@
+// 4. Enum Jurusan untuk Konsistensi Jurusan Mahasiswa
+enum Jurusan {
+  Informatika,
+  TeknikElektro,
+  SistemInformasi,
+  DesainKomunikasiVisual
+}
+
+// 3. Mixin Kegiatan untuk Aktivitas Mahasiswa
+mixin Kegiatan {
+  void belajar() {
+    print("Sedang belajar...");
+  }
+
+  void istirahat() {
+    print("Sedang makan...");
+  }
+}
+
+// 1. b. Kelas abstrak Person untuk Mendefinisikan Atribut Umum
+abstract class Person {
+  String nama;
+  int usia;
+
+  Person(this.nama, this.usia);
+
+  void perkenalan(); // Metode ini diimplementasikan oleh subclass
+}
+
+// 1. a. Kelas Mahasiswa untuk Menyimpan Data Mahasiswa
+class Mahasiswa extends Person with Kegiatan {
+  String npm;
+  Jurusan jurusan;
+
+  // 2. Penggunaan Positional dan Named Arguments
+  Mahasiswa(String nama, int usia, this.npm, {required this.jurusan})
+      : super(nama, usia);
+
+  // Getter infoMahasiswa untuk Menampilkan Informasi Mahasiswa
+  String get infoMahasiswa =>
+      "Nama: $nama, Usia: $usia, NPM: $npm, Jurusan: ${jurusan.name}";
+
+  // Setter gantiJurusan untuk Mengubah Jurusan Mahasiswa
+  set gantiJurusan(Jurusan newJurusan) {
+    jurusan = newJurusan;
+  }
+
+  // 1. Implementasi Metode perkenalan
+  @override
+  void perkenalan() {
+    print(
+        "Halo, nama saya $nama dan saya adalah mahasiswa jurusan ${jurusan.name}.");
+  }
+}
+
+// 1. a. Kelas MahasiswaTingkatLanjut untuk Menyimpan Data Penelitian
+class MahasiswaTingkatLanjut extends Mahasiswa {
+  String penelitian;
+
+  // Menambahkan penelitiannya ke konstruktor
+  MahasiswaTingkatLanjut(
+      String nama, int usia, String npm, Jurusan jurusan, this.penelitian)
+      : super(nama, usia, npm, jurusan: jurusan);
+
+  // Overriding metode perkenalan untuk mencetak informasi tambahan
+  @override
+  void perkenalan() {
+    super.perkenalan();
+    print("Saya sedang melakukan penelitian tentang $penelitian.");
+  }
+}
+
+void main() {
+  // Membuat objek Mahasiswa
+  Mahasiswa mhs1 =
+      Mahasiswa("Annisa", 20, "07352211107", jurusan: Jurusan.Informatika);
+  mhs1.perkenalan();
+  mhs1.belajar();
+
+  print(mhs1.infoMahasiswa);
+
+  // Mengubah jurusan mahasiswa
+  mhs1.gantiJurusan = Jurusan.SistemInformasi;
+  print("Jurusan baru: ${mhs1.jurusan.name}");
+
+  // Membuat objek MahasiswaTingkatLanjut
+  MahasiswaTingkatLanjut mhs2 = MahasiswaTingkatLanjut(
+    "Tasya",
+    23,
+    "092211128",
+    Jurusan.TeknikElektro,
+    "AI untuk Otomasi Industri",
+  );
+  mhs2.perkenalan();
+  mhs2.istirahat();
+}
